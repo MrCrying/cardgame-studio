@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>卡組工作室</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="top">
+      <div>
+        <h1>卡組工作室</h1>
+        <p class="muted">圖鑑不顯示首領卡與訓練木樁。單位表含單位卡與法術卡。</p>
+      </div>
+      <nav class="tabs" id="tabs">
+        <button type="button" data-tab="catalog" class="active">圖鑑</button>
+        <button type="button" data-tab="units">單位表</button>
+        <button type="button" data-tab="bosses">首領圖鑑</button>
+        <button type="button" data-tab="glossary">效果圖鑑</button>
+        <button type="button" data-tab="deck" >組卡組</button>
+        <button type="button" data-tab="studio">製卡</button>
+      </nav>
+    </header>
+
+    <section id="panel-catalog" class="panel">
+      <div class="filters">
+        <input id="cat-q" type="search" placeholder="搜尋卡名或效果" />
+        <select id="cat-kind"></select>
+        <select id="cat-rarity">
+          <option value="all">稀有度：全部</option>
+          <option value="common">普通</option>
+          <option value="epic">史詩</option>
+          <option value="legend">傳奇</option>
+          <option value="hero">英雄</option>
+        </select>
+        <select id="cat-season">
+          <option value="all">賽季：全部</option>
+        </select>
+        <span class="muted" id="cat-count"></span>
+      </div>
+      <div id="catalog-grid" class="grid"></div>
+    </section>
+
+    <section id="panel-units" class="panel hidden">
+      <h2>單位表</h2>
+      <p class="muted">同一張表含單位卡與法術卡，依稀有度分組。訓練木樁與首領在首領圖鑑。</p>
+      <div class="filters">
+        <input id="unit-q" type="search" placeholder="搜尋卡名或效果" />
+        <select id="unit-kind"></select>
+        <select id="unit-rarity">
+          <option value="all">稀有度：全部</option>
+          <option value="common">普通</option>
+          <option value="epic">史詩</option>
+          <option value="legend">傳奇</option>
+          <option value="hero">英雄</option>
+        </select>
+        <span class="muted" id="unit-count"></span>
+      </div>
+      <div id="unit-tables"></div>
+    </section>
+
+    <section id="panel-bosses" class="panel hidden">
+      <div class="filters">
+        <input id="boss-q" type="search" placeholder="搜尋首領或訓練木樁" />
+        <span class="muted" id="boss-count"></span>
+      </div>
+      <div id="boss-grid" class="grid"></div>
+    </section>
+
+    <section id="panel-glossary" class="panel hidden">
+      <h2>效果圖鑑</h2>
+      <p class="muted">效果名稱與規則說明。卡牌圖鑑只顯示名稱，詳細以本頁為準。</p>
+      <div class="filters">
+        <input id="gloss-q" type="search" placeholder="搜尋效果名稱或說明" />
+        <span class="muted" id="gloss-count"></span>
+      </div>
+      <table class="glossary" id="glossary-table"></table>
+    </section>
+
+    <section id="panel-deck" class="panel hidden">
+      <div class="deck-layout">
+        <div>
+          <h2>盤面</h2>
+          <p class="muted">開局只設定第一排與第二排共 6 格與手牌。對局中的英雄格是盤面位置，不是卡組欄位。場地卡請放入手牌，開局後才可使用。卡名不可重複。</p>
+          <div class="board">
+            <div class="row-label">第一排</div>
+            <div class="slots" id="slots-front"></div>
+            <div class="row-label">第二排</div>
+            <div class="slots" id="slots-second"></div>
+            <div class="row-label">手牌備註</div>
+            <div class="slots wide">
+              <div class="slot" data-slot="field"><span class="slot-title">場地（入手牌）</span><span class="slot-name"></span></div>
+            </div>
+            <div class="row-label">手牌</div>
+            <div class="slots" id="slots-hand"></div>
+          </div>
+          <p class="status" id="deck-status"></p>
+          <div class="actions">
+            <button type="button" id="deck-clear">清空</button>
+            <button type="button" id="deck-copy">複製分享碼</button>
+            <button type="button" id="deck-export">匯出 JSON</button>
+          </div>
+          <label class="block">分享碼（短碼 L3；須登錄本機機器人才能給 Discord 匯入）
+            <input id="share-code" type="text" placeholder="L3.…" />
+          </label>
+          <button type="button" id="deck-import">匯入分享碼</button>
+        </div>
+        <aside>
+          <h2>可放入的卡</h2>
+          <div class="deck-filters">
+            <input id="deck-q" type="search" placeholder="搜尋卡名" />
+            <select id="deck-kind"></select>
+            <select id="deck-rarity">
+              <option value="all">稀有度：全部</option>
+              <option value="common">普通</option>
+              <option value="epic">史詩</option>
+              <option value="legend">傳奇</option>
+              <option value="hero">英雄</option>
+            </select>
+            <select id="deck-season">
+              <option value="all">賽季：全部</option>
+            </select>
+          </div>
+          <p class="muted" id="deck-hint">先點左側空格，再點右側卡牌。</p>
+          <div id="deck-list" class="list"></div>
+        </aside>
+      </div>
+    </section>
+
+    <section id="panel-studio" class="panel hidden">
+      <div class="studio-layout">
+        <form id="studio-form" class="card-form">
+          <h2>新卡草稿</h2>
+          <p class="muted">草稿只存在此瀏覽器。要進遊戲，需把匯出的 JSON 交給程式再寫入卡冊。</p>
+          <label>卡名 <input name="name" required maxlength="40" /></label>
+          <label>類型
+            <select name="kind" id="studio-kind">
+              <option value="unit">單位卡</option>
+              <option value="field">場地卡</option>
+              <option value="spell">法術卡</option>
+              <option value="boss">首領卡</option>
+            </select>
+          </label>
+          <label>稀有度
+            <select name="rarity">
+              <option value="common">普通</option>
+              <option value="epic">史詩</option>
+              <option value="legend">傳奇</option>
+              <option value="hero">英雄</option>
+              <option value="boss">首領</option>
+            </select>
+          </label>
+          <label>賽季 <input name="season" type="number" min="1" max="8" value="5" /></label>
+          <fieldset id="studio-unit-stats">
+            <legend>單位數值</legend>
+            <label>近戰 <input name="melee" type="number" min="0" value="0" /></label>
+            <label>遠程 <input name="ranged" type="number" min="0" value="0" /></label>
+            <label>亡靈 <input name="undead" type="number" min="0" value="0" /></label>
+            <label>攻擊次數 <input name="attackCount" type="number" min="0" value="1" /></label>
+            <label>攻擊冷卻 <input name="cooldownMax" type="number" min="0" value="1" title="預設 1；填 0 表示無冷卻" /></label>
+            <label>護盾 <input name="defense" type="number" min="0" value="0" /></label>
+            <label>生命 <input name="hp" type="number" min="0" value="1" /></label>
+          </fieldset>
+          <fieldset id="studio-spell-stats">
+            <legend>法術數值</legend>
+            <label>傷害 <input name="spellAttack" type="number" min="0" value="0" /></label>
+            <label>傷害類型
+              <select name="spellDamageType">
+                <option value="">請選擇</option>
+                <option value="melee">近戰</option>
+                <option value="ranged">遠程</option>
+                <option value="undead">亡靈</option>
+              </select>
+            </label>
+            <label>斬殺門檻 <input name="executeThreshold" type="number" min="0" value="0" /></label>
+            <label>延遲換邊 <input name="delayTurns" type="number" min="0" value="0" /></label>
+          </fieldset>
+          <fieldset id="studio-skills" class="hidden">
+            <legend>首領技能</legend>
+            <p class="muted studio-full">技能是這張卡自己的能力，不是下方通用效果。</p>
+            <div id="studio-skill-list" class="skill-list studio-full"></div>
+            <button type="button" id="studio-add-skill" class="studio-full">新增技能</button>
+          </fieldset>
+          <fieldset>
+            <legend>套用現有效果</legend>
+            <p class="muted studio-full">效果圖鑑條目皆可勾選。次數／回合／數值只在勾選後出現；說明停在名稱上即可看到。</p>
+            <input id="studio-effect-q" class="studio-full" type="search" placeholder="搜尋效果" />
+            <div id="studio-effects" class="effect-pick"></div>
+          </fieldset>
+          <p class="status" id="studio-status"></p>
+          <label>效果備註 <textarea name="notes" rows="3" placeholder="額外說明（選填）"></textarea></label>
+          <div class="actions">
+            <button type="submit">加入草稿</button>
+            <button type="button" id="studio-export">匯出草稿 JSON</button>
+          </div>
+        </form>
+        <div>
+          <h2>本機草稿</h2>
+          <div id="draft-list" class="list"></div>
+        </div>
+      </div>
+    </section>
+
+    <script src="cards.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
